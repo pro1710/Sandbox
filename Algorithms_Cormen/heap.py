@@ -1,6 +1,8 @@
+infinity = float('inf')
+
 class Heap(object):
-    def __init__(self, lst: list):
-        self._lst = lst
+    def __init__(self, lst: list=[]):
+        self._lst = list(lst)
         self.size = 0
         self.build_max_heap()
     
@@ -19,7 +21,7 @@ class Heap(object):
     def list(self):
         return self._lst
     
-    def parrent(self):
+    def parrent(self, i):
         '''
         Returns parrent node for i-th child
         '''
@@ -37,6 +39,8 @@ class Heap(object):
         '''
         return 2 * i + 1
 
+class MaxHeap(Heap):
+    
     def max_heapify(self, root_idx):
         '''
           Maintain the heap property for heap _lst
@@ -64,19 +68,49 @@ class Heap(object):
         self.size = len(self._lst)
         for i in reversed(range(self.size // 2)):
             self.max_heapify(i)
-      
-    @staticmethod    
-    def sort(lst: list):
-        '''
-        Sort elemnts of _lst using heapsort algorithm
-        '''
-        h = Heap(lst)
-        for i in reversed(range(1, len(h))):
-            h[0], h[i] = h[i], h[0]
-            h.size -= 1
-            h.max_heapify(0)
-        return h.list()
             
+    
+def heapsort(lst: list):
+    '''
+    Sort elemnts of _lst using heapsort algorithm
+    '''
+    h = MaxHeap(lst)
+    for i in reversed(range(1, len(h))):
+        h[0], h[i] = h[i], h[0]
+        h.size -= 1
+        h.max_heapify(0)
+    return h.list()
+            
+     
+class MaxPriorityQueue(MaxHeap):
+    def maximum(self):
+        return self._lst[0]
+    
+    def extract_max(self):
+        assert self.size > 0, 'heap underflow'
+        
+        max_element = self.maximum()
+        
+        self._lst[0] = self._lst[-1] # assign 1st element to last element
+        self.size -= 1
+        del self._lst[-1] # remove last element
+        self.max_heapify(0)
+        
+        return max_element
+        
+    def increase_key(self, i, key):
+        assert key > self._lst[i], 'new key smaller than current key'
+        
+        self._lst[i] = key
+        while i > 0 and self.parrent(i) < self._lst[i]:
+            self._lst[i], self._lst[self.parrent(i)] = self._lst[self.parrent(i)], self._lst[i]
+            i = self.parrent(i)
+            
+    def insert(self, key):
+        self.size += 1
+        self._lst.append(-infinity)
+        self.increase_key(self.size - 1, key)
+        
         
 
 # unit tests
@@ -86,12 +120,32 @@ import random
 class TestHeapSort(unittest.TestCase):
     pass    
 
-def test():
-    assert(1==1)
+class TestMaxPriorityQueue(unittest.TestCase):
+    def setUp(self):
+        self.lst = [0, 4, 5, 100, 1, 2, 3, 101, 102, 103]
+        self.queue = MaxPriorityQueue(self.lst)
+        
+    def test_insert(self):
+        self.queue.insert(42)
+        self.lst.append(42)
+        
+        self.assertEqual(self.queue.size, len(self.lst))
+        
+    def test_maximum_1(self):
+        self.assertEqual(self.queue.maximum(), max(self.lst))
+        
+    def test_extract_max(self):
+        extracted = self.queue.extract_max()
+        expected = max(self.lst)
+        del self.lst[self.lst.index(max(self.lst))]
+        
+        print(expected, extracted)
+        
+        self.assertTrue(extracted == expected and self.queue.size == len(self.lst))
                       
 if __name__ == '__main__':
     TESTS_NUMBER = 10
-    TEST_SIZE = 10000
+    TEST_SIZE = 100
     TEST_RANGE = 1000
     
     test_lists = [[random.randrange(TEST_SIZE) for _1 in range(TEST_RANGE)] for _2 in range(TESTS_NUMBER)]
@@ -100,7 +154,7 @@ if __name__ == '__main__':
     
     for i in range(len(test_lists)):
         testmethodname = 'test_fn_{0}'.format(i)
-        testmethod = lambda self: self.assertEqual(sorted(test_lists[i]), Heap.sort(test_lists[i]))
+        testmethod = lambda self: self.assertEqual(sorted(test_lists[i]), heapsort(test_lists[i]))
         setattr(TestHeapSort, testmethodname, testmethod)
     unittest.main()
 
