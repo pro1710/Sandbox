@@ -18,6 +18,28 @@ class LinearSort(object):
     
     @staticmethod
     def radix_sort(a):
+        RADIX = 10
+        maxLength = False
+        tmp , placement = -1, 1
+
+        while not maxLength:
+            maxLength = True
+            buckets = [list() for _ in range(RADIX)]
+
+            for val in a:
+                tmp = val // placement
+                buckets[tmp % RADIX].append(val)
+                if maxLength and tmp > 0:
+                    maxLength = False
+
+            i = 0
+            for buck in buckets:
+                for b in buck:
+                    a[i] = b
+                    i += 1
+
+            placement *= RADIX
+            
         return a
             
     
@@ -25,15 +47,14 @@ class LinearSort(object):
 import random
 import unittest
 
-random.seed(42) # debug
+# random.seed(42) # debug
 
-TEST_RANGE = 10
-TEST_SIZE = 20
+TEST_RANGE = 100
+TEST_SIZE = 10000
 
 class TestLinearSort(unittest.TestCase):
     def setUp(self):
         self.test = [random.randrange(TEST_RANGE) for _1 in range(TEST_SIZE)]
-        print(self.test)
         self.expected = sorted(self.test)
         
     def tearDown(self):
