@@ -37,24 +37,25 @@ class QuickSort(object):
 # unit tests
 import unittest
 
-TEST_SIZE = 1000000
+TEST_SIZE = 10
 TEST_RANGE = 1000
 
 class TestQuickSort(unittest.TestCase):
-    
+    def setUp(self):
+        self.test = [random.randrange(TEST_RANGE) for _1 in range(TEST_SIZE)]
+        self.expected = sorted(self.test)
+        
+    def tearDown(self):
+        self.test = []
+        self.expected = []
+        
     def test_simple_partition(self):
-        test = [random.randrange(TEST_SIZE) for _1 in range(TEST_RANGE)]
-        #debug
-        QuickSort.sort(test, partition=QuickSort.Partition.simple)
-        expected = sorted(test)
-        self.assertEqual(test, expected)
+        QuickSort.sort(self.test, partition=QuickSort.Partition.simple)
+        self.assertEqual(self.test, self.expected)
         
     def test_randomized_partition(self):
-        test = [random.randrange(TEST_SIZE) for _1 in range(TEST_RANGE)]
-        #debug
-        QuickSort.sort(test, partition=QuickSort.Partition.randomized)
-        expected = sorted(test)
-        self.assertEqual(test, expected)
+        QuickSort.sort(self.test, partition=QuickSort.Partition.randomized)
+        self.assertEqual(self.test, self.expected)
         
                       
 if __name__ == '__main__':
